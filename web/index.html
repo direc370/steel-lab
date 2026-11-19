@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEEL/LAB · 炼钢配比工作台</title>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark"><b>STEEL</b><i>/LAB</i><span class="dot"></span></div>
+      <div class="sub">Charge &amp; Refining Console</div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidefoot">
+      <div class="mini-manual">
+        <b>知识库</b><br>MAN0105601-CN<br>MAN0106601-CN
+      </div>
+      <div class="status"><i></i><span id="engine-status">本地引擎运行中</span></div>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb" id="crumb">工作台 / <b>总览</b></div>
+      <div class="top-right">
+        <span class="chip"><span class="dot"></span><span id="top-grade">未选择钢种</span></span>
+        <button class="chip heat-chip" id="top-heat" onclick="go('plan')" title="打开初始规划"><span class="dot"></span><span id="top-heat-text">炉次未建立</span></button>
+        <button class="chip" id="top-user" onclick="openSettings()" title="点击修改我的名字"><span class="dot"></span><span id="top-user-text">未设置</span></button>
+        <span class="chip mono" id="top-date">—</span>
+        <button class="icon-btn" id="btn-settings" title="设置">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div id="view" class="view"></div>
+  </main>
+</div>
+<div id="toast"></div>
+<div id="modal-root"></div>
+<script>
+(function () {
+  var sc = "";
+  try { sc = new URLSearchParams(location.search).get("sharecode") || ""; } catch (e) {}
+  var q = sc ? "?sharecode=" + encodeURIComponent(sc) : "";
+  var link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "styles.css" + q;
+  document.head.appendChild(link);
+  var script = document.createElement("script");
+  script.src = "app.js" + q;
+  document.body.appendChild(script);
+})();
+</script>
+</body>
+</html>

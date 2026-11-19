@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.git/
+.env
+data/config.json
+data/runs.json
+data/runs.json.tmp

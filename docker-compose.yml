@@ -1,0 +1,13 @@
+services:
+  steel-lab:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      STEEL_LAB_TOKEN: ${STEEL_LAB_TOKEN:-}
+      STEEL_LAB_API_KEY: ${STEEL_LAB_API_KEY:-}
+      STEEL_LAB_BASE_URL: ${STEEL_LAB_BASE_URL:-}
+      STEEL_LAB_MODEL: ${STEEL_LAB_MODEL:-}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

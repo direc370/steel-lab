@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>二次精炼 · 工程钢操作清单</title>
+<style>
+  :root {
+    --ink: #1f2328; --ink-2: #5b6470; --line: #d9dde3; --bg: #f4f2ec; --card: #fff;
+    --accent: #1d4ed8; --accent-2: #eff6ff;
+    --ok: #166534; --ok-bg: #f0fdf4;
+    --warn: #991b1b; --warn-bg: #fef2f2;
+    --amber: #92400e; --amber-bg: #fffbeb;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif; font-size: 13px; line-height: 1.55; }
+  .page { max-width: 980px; margin: 24px auto 60px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 28px 34px 34px; box-shadow: 0 8px 28px rgba(31,35,40,.07); }
+  header { display: flex; align-items: flex-start; gap: 18px; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
+  header h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: .2px; }
+  header .sub { color: var(--ink-2); font-size: 12px; }
+  .spacer { flex: 1; }
+  .stamp { text-align: right; font-size: 11px; color: var(--ink-2); line-height: 1.7; white-space: nowrap; }
+  .stamp b { color: var(--ink); font-size: 13px; }
+  .toolbar { display: flex; gap: 8px; margin: 16px 0 0; }
+  .toolbar button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 7px; padding: 7px 12px; font-size: 12px; cursor: pointer; }
+  .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 12px; color: var(--ink-2); }
+  .progress { flex: 1; height: 8px; background: #eceef1; border-radius: 99px; overflow: hidden; }
+  .progress > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #1d4ed8, #60a5fa); transition: width .2s ease; }
+  h2 { font-size: 15px; margin: 24px 0 10px; padding-left: 10px; border-left: 4px solid var(--accent); letter-spacing: .2px; }
+  h2 small { font-weight: 400; color: var(--ink-2); font-size: 11px; margin-left: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .box { border: 1px solid var(--line); border-radius: 9px; padding: 12px 14px; background: #fcfcfa; }
+  .box h3 { margin: 0 0 8px; font-size: 12.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { border-bottom: 1px solid #eceef1; padding: 6px 4px; text-align: left; vertical-align: top; }
+  th { color: var(--ink-2); font-weight: 600; font-size: 11.5px; background: #fafaf8; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: Consolas,"SFMono-Regular",Menlo,monospace; }
+  .muted { color: var(--ink-2); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; background: #f1f3f5; color: var(--ink-2); font-weight: 600; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .pill.bad { background: var(--warn-bg); color: var(--warn); }
+  .pill.blue { background: var(--accent-2); color: var(--accent); }
+  .checklist { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .item { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: #fff; transition: background .15s ease, border-color .15s ease; }
+  .item:hover { border-color: #c7ccd3; }
+  .item.done { background: #f7f9f7; border-color: #cfe3d4; }
+  .item.done .txt { opacity: .62; }
+  .item.done .txt b { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .item input[type="checkbox"] { width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--accent); flex: 0 0 auto; cursor: pointer; }
+  .time { flex: 0 0 86px; font-family: Consolas,Menlo,monospace; font-size: 11.5px; color: var(--accent); font-weight: 700; padding-top: 1px; white-space: nowrap; }
+  .txt { flex: 1; min-width: 0; }
+  .txt .why { display: block; color: var(--ink-2); font-size: 11.5px; margin-top: 2px; }
+  .qty { font-family: Consolas,Menlo,monospace; font-weight: 700; color: var(--accent); }
+  .warnbox { border: 1px solid #f3c6c6; background: var(--warn-bg); border-radius: 9px; padding: 12px 14px; margin-top: 10px; }
+  .warnbox h3 { margin: 0 0 6px; font-size: 12.5px; color: var(--warn); }
+  .warnbox ul { margin: 4px 0 0 18px; padding: 0; }
+  .warnbox li { margin: 3px 0; }
+  .okbox { border: 1px solid #cfe3d4; background: var(--ok-bg); border-radius: 9px; padding: 12px 14px; margin-top: 10px; }
+  .okbox h3 { margin: 0 0 6px; font-size: 12.5px; color: var(--ok); }
+  .okbox ul { margin: 4px 0 0 18px; padding: 0; }
+  .okbox li { margin: 3px 0; }
+  .amberbox { border: 1px solid #f3d18b; background: var(--amber-bg); border-radius: 9px; padding: 12px 14px; margin-top: 10px; }
+  .amberbox h3 { margin: 0 0 6px; font-size: 12.5px; color: var(--amber); }
+  .amberbox ul { margin: 4px 0 0 18px; padding: 0; }
+  .amberbox li { margin: 3px 0; }
+  .note { font-size: 11.5px; color: var(--ink-2); margin-top: 8px; }
+  .kpi { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 10px; }
+  .kpi .k { border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; background: #fcfcfa; }
+  .kpi .k span { display: block; font-size: 10.5px; color: var(--ink-2); }
+  .kpi .k b { font-size: 16px; font-family: Consolas,Menlo,monospace; }
+  footer { margin-top: 26px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 10.5px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 16px; }
+  @media (max-width: 760px) { .page { margin: 0; border-radius: 0; padding: 20px 16px 28px; } .grid2 { grid-template-columns: 1fr; } .kpi { grid-template-columns: 1fr 1fr; } header { flex-direction: column; } .stamp { text-align: left; } }
+  @media print { @page { size: A4; margin: 12mm; } body { background: #fff; font-size: 10.5px; } .page { max-width: none; margin: 0; border: 0; box-shadow: none; padding: 0; } .toolbar,.progress-wrap { display: none; } .item { break-inside: avoid; } h2 { break-after: avoid; } .warnbox,.okbox,.amberbox,.box { break-inside: avoid; } header { padding-bottom: 10px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>二次精炼 · 工程钢操作清单</h1>
+      <div class="sub">钢包 88 t · 设备：CAS-OB → 钢包脱气 → 钢包炉 · 目标 C 0.35–0.40 / Mn 1.30–1.60 / Cr 1.80–2.10 / Mo 0.15–0.25</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stamp">
+      <b>#1552955 装入成分</b><br>CAS-OB → 脱气 → LF<br>
+      1641°C · 88 t（按 88 t 计）<br>
+      EAF 成本 $440.31
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button id="btn-reset">重置全部</button>
+    <button id="btn-print">打印 / 导出 PDF</button>
+    <span class="muted" style="align-self:center;font-size:11px">勾选状态自动保存在本机</span>
+  </div>
+  <div class="progress-wrap">
+    <span id="progress-text">0 / 0</span>
+    <div class="progress"><i id="progress-bar"></i></div>
+    <span id="progress-pct">0%</span>
+  </div>
+
+  <h2>一、装入成分 vs 目标 <small>先看差距，再决定加什么</small></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>装入成分（EAF 出钢）</h3>
+      <table>
+        <thead><tr><th>元素</th><th class="num">装入 %</th><th class="num">目标</th><th>判断</th></tr></thead>
+        <tbody>
+          <tr><td>C</td><td class="num mono">0.5588</td><td class="num">0.3500–0.4000</td><td><span class="pill bad">需脱碳</span></td></tr>
+          <tr><td>Si</td><td class="num mono">0.3041</td><td class="num">0.2400–0.3200</td><td><span class="pill ok">合格</span></td></tr>
+          <tr><td>Mn</td><td class="num mono">1.0634</td><td class="num">1.3000–1.6000</td><td><span class="pill bad">需补 Mn</span></td></tr>
+          <tr><td>P</td><td class="num mono">0.0096</td><td class="num">≤0.0350</td><td><span class="pill ok">合格</span></td></tr>
+          <tr><td>S</td><td class="num mono">0.0104</td><td class="num">≤0.0350</td><td><span class="pill ok">合格</span></td></tr>
+          <tr><td>Cr</td><td class="num mono">1.5975</td><td class="num">1.8000–2.1000</td><td><span class="pill bad">需补 Cr</span></td></tr>
+          <tr><td>Mo</td><td class="num mono">0.0227</td><td class="num">0.1500–0.2500</td><td><span class="pill bad">需补 Mo</span></td></tr>
+          <tr><td>Al</td><td class="num mono">0.0076</td><td class="num">≤0.0040</td><td><span class="pill bad">需控制</span></td></tr>
+          <tr><td>O</td><td class="num mono">0.0500</td><td class="num">≤0.0020</td><td><span class="pill bad">需脱氧</span></td></tr>
+          <tr><td>N</td><td class="num mono">0.0080</td><td class="num">≤0.0090</td><td><span class="pill ok">接近上限</span></td></tr>
+          <tr><td>H</td><td class="num mono">0.0002</td><td class="num">≤0.0003</td><td><span class="pill ok">合格</span></td></tr>
+          <tr><td>Ni</td><td class="num mono">0.0379</td><td class="num">≤0.1000</td><td><span class="pill ok">合格</span></td></tr>
+          <tr><td>B / Nb / Ti / V</td><td class="num mono">0 / 0.0069 / 0.0050 / 0.0046</td><td class="num">B ≤0.005；其余无下限</td><td><span class="pill ok">合格</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box">
+      <h3>差距结论</h3>
+      <table>
+        <thead><tr><th>任务</th><th>数值</th><th>工艺</th></tr></thead>
+        <tbody>
+          <tr><td>脱碳</td><td class="mono">0.5588 → 0.33–0.35</td><td>CAS-OB 吹氧</td></tr>
+          <tr><td>补 Mn</td><td class="mono">+0.30%（到 1.36）</td><td>HCFeMn + LCFeMn</td></tr>
+          <tr><td>补 Cr</td><td class="mono">+0.26%（到 1.86）</td><td>高碳铬铁</td></tr>
+          <tr><td>补 Mo</td><td class="mono">+0.137%（到 0.16）</td><td>钼铁（最贵）</td></tr>
+          <tr><td>脱氧</td><td class="mono">O 0.050 → ≤0.002</td><td>铝块 50–60 kg，分两次</td></tr>
+          <tr><td>Al 控制</td><td class="mono">≤0.0040</td><td>不额外加铝，取样控制</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Mo 只做到 0.16%，不要冲到 0.25%：每多 0.01% Mo 约多花 $190–200，且低端已足够合格。</div>
+    </div>
+  </div>
+
+  <h2>二、合金加入量 <small>按 88 t 钢水；若实际 W 吨，全部 ×W/88</small></h2>
+  <div class="box">
+    <table>
+      <thead><tr><th>添加剂</th><th class="num">加入量</th><th class="num">单价</th><th class="num">成本</th><th>作用 / 注意</th></tr></thead>
+      <tbody>
+        <tr><td class="strong">钼铁 FeMo（70% Mo）</td><td class="num mono">180 kg</td><td class="num">$16.80/kg</td><td class="num">$3,024</td><td>Mo 0.0227 → 0.1629；先加，搅拌 5–8 min</td></tr>
+        <tr><td class="strong">高碳铬铁（66.5% Cr）</td><td class="num mono">380 kg（后补 100，合计 480）</td><td class="num">$1.26/kg</td><td class="num">$605</td><td>Cr 1.5975 → 1.9379；10 kg 档</td></tr>
+        <tr><td class="strong">高碳锰铁 HCFeMn</td><td class="num mono">180 kg</td><td class="num">$0.49/kg</td><td class="num">$88</td><td>Mn 补充；带 C</td></tr>
+        <tr><td class="strong">低碳锰铁 LCFeMn</td><td class="num mono">180 kg</td><td class="num">$0.84/kg</td><td class="num">$151</td><td>补 Mn，少带 C；与 HCFeMn 搭配控制 C</td></tr>
+        <tr><td class="strong">铝块（98% Al）</td><td class="num mono">0 kg（O &gt;0.002 时 40+10–20）</td><td class="num">$1.40/kg</td><td class="num">$0–84</td><td>这次 O 1.6 ppm，不需要加铝</td></tr>
+        <tr><td class="strong">合计</td><td class="num mono">1,020 kg</td><td></td><td class="num strong">$3,868</td><td>不含 EAF 的 $441</td></tr>
+      </tbody>
+    </table>
+    <div class="note">以上是 #715210 实测配方，全部按 10 kg 档；不要用 175/377/186/179 这种非 10 kg 的数。不要加硅铁、镍、硼、脱硫渣。</div>
+  </div>
+
+  <h2>三、操作时间线 <small>顺序不能反：脱碳 → 脱氧 → 合金化 → 调温</small></h2>
+  <div class="checklist">
+    <label class="item"><input type="checkbox" data-k="r1">
+      <span class="time">00:00–00:03</span>
+      <span class="txt"><b>钢包到氩气搅拌站，确认重量/温度/成分</b>
+        <span class="why">装入 88 t、1641°C；先搅拌 2–3 分钟，让成分和温度均匀。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r2">
+      <span class="time">00:03–00:12</span>
+      <span class="txt"><b>CAS-OB 吹氧预脱碳：C 0.5588 → <span class="qty">0.42–0.45%</span></b>
+        <span class="why">CAS-OB 面板：电源打开 → 把第二行“吹氧”开关拨到开（只有开/关，没有流量数值）→ 氩气流量拉到 1.0 Nm³/min；每 2–3 分钟取样看 C，到 0.42–0.45 立即关“吹氧”。这一步只做“粗脱碳”，不要把 C 吹到 0.30，否则 Cr/Mn/Si 氧化过多。不要先加铝。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r3">
+      <span class="time">00:12–00:20</span>
+      <span class="txt"><b>钢包脱气（罐式）真空脱碳：C 0.42–0.45 → <span class="qty">0.33–0.35%</span></b>
+        <span class="why">钢包吊入罐式脱气器，开真空、开氩气（1–2 Nm³/min），5–8 分钟；每 2 分钟看 C。到 0.33–0.35 停真空。停氧/停真空后取样确认 C、Cr、Mn、Si。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r4">
+      <span class="time">00:20–00:28</span>
+      <span class="txt"><b>钢包炉 LF 铝脱氧：先加 <span class="qty">40 kg</span> 铝块，搅拌 3–5 min，取样 O/Al</b>
+        <span class="why">目标 O ≤0.0020、Al ≤0.0040。若 O 仍 &gt;0.0020，再加 <span class="qty">10–20 kg</span> 铝块；若 Al 已 &gt;0.0040，停止加铝，改氩气搅拌让 Al₂O₃ 上浮。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r5">
+      <span class="time">00:28–00:38</span>
+      <span class="txt"><b>LF 合金化：钼铁 <span class="qty">175 kg</span> → 高碳铬铁 <span class="qty">377 kg</span>（按停氧后 Cr 调整）→ HCFeMn <span class="qty">186 kg</span> + LCFeMn <span class="qty">179 kg</span>（按停氧后 Mn 调整）</b>
+        <span class="why">钼铁最难溶，先加；每加一批用氩气搅拌 2–3 分钟，全部加完后继续搅拌 5–8 分钟。Cr/Mn/Si 的实际加入量见下面“停氧后调整”。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r6">
+      <span class="time">00:38–00:45</span>
+      <span class="txt"><b>LF 取样确认 + 调温：C 0.35–0.40、Si 0.24–0.32、Mn 1.30–1.60、Cr 1.80–2.10、Mo 0.15–0.25</b>
+        <span class="why">C &lt;0.35 加 10–20 kg 增碳剂；Si &lt;0.24 加 10–20 kg 高纯硅铁；Mn/Cr/Mo 低少量补。目标出站温度按模拟器显示（通常 1550–1600°C）；LF 20 MW 少量多次加热。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="r7">
+      <span class="time">00:45–00:52</span>
+      <span class="txt"><b>最终取样 + 送连铸；若 H/N 偏高，再进钢包脱气 3–5 min</b>
+        <span class="why">确认 O ≤0.0020、Al ≤0.0040、N ≤0.0090、H ≤0.0003；把钢包送到指定连铸机，不要送错。</span></span>
+    </label>
+  </div>
+
+  <h2>四、预期最终成分与成本</h2>
+  <div class="kpi">
+    <div class="k"><span>出钢量</span><b>≈89.2 t</b></div>
+    <div class="k"><span>合金+铝成本</span><b>≈$3,868</b></div>
+    <div class="k"><span>模拟器总成本</span><b>493.41 $/t</b></div>
+    <div class="k"><span>处理时间（上炉）</span><b>1:44</b></div>
+  </div>
+  <div class="box" style="margin-top:12px">
+    <table>
+      <thead><tr><th>元素</th><th class="num">目标</th><th class="num">上炉实测 #715210</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr><td>C</td><td class="num">0.3500–0.4000</td><td class="num mono">0.3871</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Si</td><td class="num">0.2400–0.3200</td><td class="num mono">0.2917</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Mn</td><td class="num">1.3000–1.6000</td><td class="num mono">1.3584</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>P</td><td class="num">≤0.0350</td><td class="num mono">0.0106</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>S</td><td class="num">≤0.0350</td><td class="num mono">0.0105</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Cr</td><td class="num">1.8000–2.1000</td><td class="num mono">1.9379</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Mo</td><td class="num">0.1500–0.2500</td><td class="num mono">0.1629</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Al</td><td class="num">≤0.0040</td><td class="num mono">0.0000</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>O</td><td class="num">≤0.0020</td><td class="num mono">0.0016</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>N</td><td class="num">≤0.0090</td><td class="num mono">0.0079</td><td><span class="pill ok">接近上限</span></td></tr>
+        <tr><td>H</td><td class="num">≤0.0003</td><td class="num mono">0.0001</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Ni</td><td class="num">≤0.1000</td><td class="num mono">0.0375</td><td><span class="pill ok">合格</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note">以上是 #715210 实测最终成分，17 个元素全绿；下一炉按 10 kg 档同配方。</div>
+  </div>
+
+  <div class="amberbox">
+    <h3>停氧后调整（CAS-OB 吹氧 + 钢包脱气真空脱碳会氧化部分 Cr/Mn/Si）</h3>
+    <ul>
+      <li><b>Cr 停氧后：</b>1.40% → 高碳铬铁 <b>640 kg</b>；1.50% → <b>510 kg</b>；1.60% → <b>380 kg</b>。每低 0.01% Cr，多补约 13 kg 高碳铬铁。</li>
+      <li><b>Mn 停氧后：</b>0.90% → HCFeMn <b>280 kg</b> + LCFeMn <b>290 kg</b>；1.00% → <b>220 + 222 kg</b>；1.10% → <b>160 + 159 kg</b>。</li>
+      <li><b>Si 停氧后：</b>低于 0.24% 才补；每 +0.01% Si 约 12 kg 高纯硅铁 75%。</li>
+      <li><b>C 停氧后：</b>低于 0.33% 加 10–20 kg 增碳剂；合金本身还会带约 0.037% C。</li>
+      <li><b>Mo：</b>不被吹氧氧化，仍按 175 kg 钼铁加；钼铁在 LF 加，搅拌 5–8 min 再取样。</li>
+    </ul>
+  </div>
+
+  <h2>五、红线与异常处理</h2>
+  <div class="warnbox">
+    <h3>绝对不要做</h3>
+    <ul>
+      <li><b>CAS-OB 不开“吹氧”= 只搅拌不脱碳：</b>C 会停在 0.50 左右；面板第二行“吹氧”开关必须打开（灰色=关）。3 分钟 C 不降，先检查这个开关，不要继续等。</li>
+      <li><b>不要先加合金再脱碳：</b>C 0.5588 高于目标 0.40；先加铬铁/锰铁会把 C 顶得更高，后面 CAS-OB 吹氧还会氧化 Cr。</li>
+      <li><b>不要先加铝再脱碳：</b>铝会先被氧烧掉，脱氧失败；必须脱碳结束后再加铝。</li>
+      <li><b>不要加硅铁：</b>Si 0.3041 已接近上限 0.32；再加就超。</li>
+      <li><b>不要加镍/硼/脱硫渣：</b>Ni、B、S 都已合格，加了只会增加成本或超限。</li>
+      <li><b>Mo 不要冲到 0.25：</b>0.16 已合格；每多 0.01% Mo 约多花 $190–200。</li>
+    </ul>
+  </div>
+  <div class="amberbox">
+    <h3>异常处理</h3>
+    <ul>
+      <li><b>脱碳过头 C &lt;0.33：</b>加 10–20 kg 增碳剂（98% C，95% 回收），不要一次加 50 kg。</li>
+      <li><b>Al 超 0.004：</b>停止加铝；氩气/真空搅拌 5–10 分钟让 Al₂O₃ 上浮，重新取样；必要时少量加氧化铁皮，但先问模拟器是否允许。</li>
+      <li><b>O 仍 &gt;0.002：</b>再补 10–20 kg 铝块，同时控制 Al 不超 0.004；不要只靠延长真空，O 必须靠铝/硅脱氧。</li>
+      <li><b>C 不降：</b>先确认 CAS-OB 的“吹氧”开关真的打开了（不是氩气流量滑块）；不要加铝（铝会杀碳氧反应）。</li>
+      <li><b>钢包脱气 8 min 后 C 仍 &gt;0.36：</b>回 CAS-OB 补吹氧 2–3 分钟，把 C 降到 0.36–0.38，再进钢包脱气 3–5 分钟；不要直接加合金。</li>
+      <li><b>N 接近 0.009：</b>全程氩气保护，避免钢包敞口；RH 真空有利于降 N。</li>
+      <li><b>温度过低：</b>LF 20 MW 升温很快，少量多次；不要用氧气升温。</li>
+      <li><b>Mo 溶解慢：</b>钼铁加完后至少搅拌 5–8 分钟再取样，否则分析会假低。</li>
+    </ul>
+  </div>
+
+  <h2>六、实测成功记录 <small>#715210 · 2026-10-27 · 17 个元素全过</small></h2>
+  <div class="okbox">
+    <h3>这套参数已跑通，下一炉优先照抄</h3>
+    <ul>
+      <li><b>CAS-OB：</b>“吹氧”开关打开、氩气 1.0 Nm³/min；C 0.5588 → 0.42–0.45 后关吹氧。</li>
+      <li><b>钢包脱气：</b>最大真空 + 氩气，C 0.42–0.45 → 0.33–0.35；这次脱气约 18 min。</li>
+      <li><b>LF 合金：</b>HCFeMn <b>180 kg</b> + LCFeMn <b>180 kg</b> + HCFeCr <b>380 kg</b>（后补 100 kg）+ FeMo <b>180 kg</b>。</li>
+      <li><b>最终：</b>C 0.3871、Si 0.2917、Mn 1.3584、Cr 1.9379、Mo 0.1629、Al 0.0000、O 0.0016、N 0.0079、H 0.0001；17 个元素全绿。</li>
+      <li><b>结果：</b>时间 1:44、温度 1581°C、夹杂物非常低、小方坯铸机、成本 <b>493.41 $/t</b>（比上一炉 504.67 低 $11.26/t）。</li>
+      <li><b>微调：</b>温度 1581 比 1578 高 3°C，下一炉 LF 少加热 3–5°C；Mo 0.1629 接近下限，FeMo 保持 180 kg 或 175 kg；其他不要大改。</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>steel-lab · 二次精炼工程钢操作清单 · 按 #1552955 装入成分</span>
+    <span>打印建议：A4 纵向 · 勾选后可作为复盘记录</span>
+  </footer>
+</div>
+
+<script>
+  const KEY = "steel-lab-checklist-refining-v1";
+  const boxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  boxes.forEach((b) => {
+    b.checked = !!saved[b.dataset.k];
+    b.closest(".item").classList.toggle("done", b.checked);
+    b.addEventListener("change", () => {
+      saved[b.dataset.k] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(saved));
+      b.closest(".item").classList.toggle("done", b.checked);
+      update();
+    });
+  });
+  function update() {
+    const done = boxes.filter((b) => b.checked).length;
+    const pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+    document.getElementById("progress-text").textContent = done + " / " + boxes.length;
+    document.getElementById("progress-pct").textContent = pct + "%";
+    document.getElementById("progress-bar").style.width = pct + "%";
+  }
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    if (!confirm("确定重置所有勾选？")) return;
+    localStorage.removeItem(KEY);
+    boxes.forEach((b) => { b.checked = false; b.closest(".item").classList.remove("done"); });
+    update();
+  });
+  document.getElementById("btn-print").addEventListener("click", () => window.print());
+  update();
+</script>
+</body>
+</html>

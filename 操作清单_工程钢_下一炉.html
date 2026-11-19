@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 工程钢 · EAF 操作清单</title>
+<style>
+  :root {
+    --ink: #1f2328;
+    --ink-2: #5b6470;
+    --line: #d9dde3;
+    --bg: #f4f2ec;
+    --card: #ffffff;
+    --accent: #b45309;
+    --accent-2: #fff7ed;
+    --ok: #166534;
+    --ok-bg: #f0fdf4;
+    --warn: #991b1b;
+    --warn-bg: #fef2f2;
+    --blue: #1e40af;
+    --blue-bg: #eff6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .page {
+    max-width: 980px;
+    margin: 24px auto 60px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 28px 34px 34px;
+    box-shadow: 0 8px 28px rgba(31, 35, 40, .07);
+  }
+  header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--ink);
+  }
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    letter-spacing: .2px;
+  }
+  header .sub {
+    color: var(--ink-2);
+    font-size: 12px;
+  }
+  .spacer { flex: 1; }
+  .stamp {
+    text-align: right;
+    font-size: 11px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    white-space: nowrap;
+  }
+  .stamp b { color: var(--ink); font-size: 13px; }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+  }
+  .toolbar button {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .progress {
+    flex: 1;
+    height: 8px;
+    background: #eceef1;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #b45309, #f59e0b);
+    transition: width .2s ease;
+  }
+  h2 {
+    font-size: 15px;
+    margin: 24px 0 10px;
+    padding-left: 10px;
+    border-left: 4px solid var(--accent);
+    letter-spacing: .2px;
+  }
+  h2 small {
+    font-weight: 400;
+    color: var(--ink-2);
+    font-size: 11px;
+    margin-left: 8px;
+  }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .box {
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 12px 14px;
+    background: #fcfcfa;
+  }
+  .box h3 {
+    margin: 0 0 8px;
+    font-size: 12.5px;
+    color: var(--ink);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    border-bottom: 1px solid #eceef1;
+    padding: 6px 4px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    color: var(--ink-2);
+    font-weight: 600;
+    font-size: 11.5px;
+    background: #fafaf8;
+  }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: Consolas, "SFMono-Regular", Menlo, monospace; }
+  .muted { color: var(--ink-2); }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    background: #f1f3f5;
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+  .pill.accent { background: var(--accent-2); color: var(--accent); }
+  .pill.blue { background: var(--blue-bg); color: var(--blue); }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 4px;
+  }
+  .item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    background: #fff;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .item:hover { border-color: #c7ccd3; }
+  .item.done {
+    background: #f7f9f7;
+    border-color: #cfe3d4;
+  }
+  .item.done .txt { opacity: .62; }
+  .item.done .txt b { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .item input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    margin: 2px 0 0;
+    accent-color: var(--accent);
+    flex: 0 0 auto;
+    cursor: pointer;
+  }
+  .time {
+    flex: 0 0 86px;
+    font-family: Consolas, "SFMono-Regular", Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--accent);
+    font-weight: 700;
+    padding-top: 1px;
+    white-space: nowrap;
+  }
+  .txt { flex: 1; min-width: 0; }
+  .txt b { font-weight: 700; }
+  .txt .why {
+    display: block;
+    color: var(--ink-2);
+    font-size: 11.5px;
+    margin-top: 2px;
+  }
+  .txt .qty {
+    font-family: Consolas, "SFMono-Regular", Menlo, monospace;
+    font-weight: 700;
+    color: var(--blue);
+  }
+  .warnbox {
+    border: 1px solid #f3c6c6;
+    background: var(--warn-bg);
+    border-radius: 9px;
+    padding: 12px 14px;
+    margin-top: 10px;
+  }
+  .warnbox h3 {
+    margin: 0 0 6px;
+    font-size: 12.5px;
+    color: var(--warn);
+  }
+  .warnbox ul { margin: 4px 0 0 18px; padding: 0; }
+  .warnbox li { margin: 3px 0; }
+  .okbox {
+    border: 1px solid #cfe3d4;
+    background: var(--ok-bg);
+    border-radius: 9px;
+    padding: 12px 14px;
+    margin-top: 10px;
+  }
+  .okbox h3 { margin: 0 0 6px; font-size: 12.5px; color: var(--ok); }
+  .okbox ul { margin: 4px 0 0 18px; padding: 0; }
+  .okbox li { margin: 3px 0; }
+  .note {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    margin-top: 8px;
+  }
+  .kpi {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .kpi .k {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: #fcfcfa;
+  }
+  .kpi .k span { display: block; font-size: 10.5px; color: var(--ink-2); }
+  .kpi .k b { font-size: 16px; font-family: Consolas, Menlo, monospace; }
+  footer {
+    margin-top: 26px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 10.5px;
+    color: var(--ink-2);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  @media (max-width: 760px) {
+    .page { margin: 0; border-radius: 0; padding: 20px 16px 28px; }
+    .grid2 { grid-template-columns: 1fr; }
+    .kpi { grid-template-columns: 1fr 1fr; }
+    header { flex-direction: column; }
+    .stamp { text-align: left; }
+  }
+  @media print {
+    @page { size: A4; margin: 12mm; }
+    body { background: #fff; font-size: 10.5px; }
+    .page { max-width: none; margin: 0; border: 0; box-shadow: none; padding: 0; }
+    .toolbar, .progress-wrap { display: none; }
+    .item { break-inside: avoid; }
+    h2 { break-after: avoid; }
+    .warnbox, .okbox, .box { break-inside: avoid; }
+    header { padding-bottom: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>2026 工程钢 · EAF 操作清单</h1>
+      <div class="sub">steeluniversity steelChallenge · 90 t 炉料 · 目标出钢 80–110 t · 总时间 ≤ 1:20</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stamp">
+      <b>#1552372 校准版</b><br>
+      配比：67.6 / 21.8 / 0.4 / 0.2<br>
+      上炉 88 t · 1641°C · 目标 80–110 t
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button id="btn-reset">重置全部</button>
+    <button id="btn-print">打印 / 导出 PDF</button>
+    <span class="muted" style="align-self:center;font-size:11px">勾选状态自动保存在本机</span>
+  </div>
+  <div class="progress-wrap">
+    <span id="progress-text">0 / 0</span>
+    <div class="progress"><i id="progress-bar"></i></div>
+    <span id="progress-pct">0%</span>
+  </div>
+
+  <h2>一、炉料与目标 <small>装料前核对</small></h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>炉料（90.0 t）</h3>
+      <table>
+        <thead><tr><th>炉料</th><th class="num">质量</th><th class="num">体积</th></tr></thead>
+        <tbody>
+          <tr><td>1 号捆包料</td><td class="num mono">67.6 t</td><td class="num mono">56.3 m³</td></tr>
+          <tr><td>直接还原铁 DRI</td><td class="num mono">21.8 t</td><td class="num mono">13.2 m³</td></tr>
+          <tr><td>电炉炉尘</td><td class="num mono">0.4 t</td><td class="num mono">0.4 m³</td></tr>
+          <tr><td>1 号重废</td><td class="num mono">0.2 t</td><td class="num mono">0.2 m³</td></tr>
+          <tr><td><b>合计</b></td><td class="num mono"><b>90.0 t</b></td><td class="num mono"><b>70.2 m³</b></td></tr>
+        </tbody>
+      </table>
+      <div class="note">装料：第 1 斗 DRI 21 t + 1 号捆包 30 t + 炉尘 1 t；第 2 斗剩余 1 号捆包 38 t。</div>
+      <div class="note">若装料只能按整吨：用 <b>68 t 1号捆包 + 21 t DRI + 1 t 炉尘 = 90 t</b>，不要 0.1 t 小数；这套预测 C 0.5584、Mn 0.4915、Cr 0.099，和 #1552955 的装入 C 0.5588 基本一致。合金仍按 10 kg 档：1,950 / 430 / 170 / 280 kg（Si 回收率按 95% 修正）。</div>
+    </div>
+    <div class="box">
+      <h3>目标成分（wt%）</h3>
+      <table>
+        <thead><tr><th>元素</th><th class="num">下限</th><th class="num">上限</th></tr></thead>
+        <tbody>
+          <tr><td>C</td><td class="num mono">0.500</td><td class="num mono">0.560</td></tr>
+          <tr><td>Si</td><td class="num mono">0.240</td><td class="num mono">0.320</td></tr>
+          <tr><td>Mn</td><td class="num mono">0.850</td><td class="num mono">1.200</td></tr>
+          <tr><td>P</td><td class="num mono">0</td><td class="num mono">0.035</td></tr>
+          <tr><td>S</td><td class="num mono">0</td><td class="num mono">0.035</td></tr>
+          <tr><td>Cr</td><td class="num mono">1.500</td><td class="num mono">1.600</td></tr>
+          <tr><td>Mo / Ni / Nb / Cu / Ti / Al / V</td><td class="num mono" colspan="2">见赛题上限（Al ≤ 0.010）</td></tr>
+        </tbody>
+      </table>
+      <div class="note">渣目标：碱度 1.5–2.5（实炉 1.698）· MgO 8–12%（实炉 8.186）· FeO 10–50%（实炉 37.117）。渣料一次加入。</div>
+    </div>
+  </div>
+
+  <h2>二、操作时间线 <small>按模拟器时钟逐项勾选</small></h2>
+  <div class="checklist">
+    <label class="item"><input type="checkbox" data-k="s1">
+      <span class="time">00:00–00:05</span>
+      <span class="txt"><b>装第 1 斗：DRI 22 t + 1 号捆包 30 t</b>
+        <span class="why">先加 DRI 铺底，再加捆包料；不要先加合金或渣料。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s2">
+      <span class="time">00:05–00:22</span>
+      <span class="txt"><b>通电熔化，功率 120 MW</b>
+        <span class="why">熔清前不加合金、不加渣料；避免合金被未熔废钢稀释或氧化。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s3">
+      <span class="time">00:22–00:24</span>
+      <span class="txt"><b>装第 2 斗：剩余 1 号捆包 38 t</b>
+        <span class="why">全部废钢必须加完，这是后面合金不提前加的前提。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s4">
+      <span class="time">00:24–00:36</span>
+      <span class="txt"><b>继续熔化，功率 120 MW</b>
+        <span class="why">目标：炉料完全熔清、熔池温度均匀，再进入造渣。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s5">
+      <span class="time">00:36–00:37</span>
+      <span class="txt"><b>一次加完全部渣料：石灰 <span class="qty">1,160 kg</span> + 白云石 <span class="qty">1,410 kg</span> + 萤石 <span class="qty">50 kg</span></b>
+        <span class="why">按 #1552807 实炉渣料制度；不再分两批，一次全部加入。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s6">
+      <span class="time">00:37–00:46</span>
+      <span class="txt"><b>通电升温，观察渣况（不再补第二批渣料）</b>
+        <span class="why">实炉 #1552807 终渣碱度 1.698、MgO 8.186%、FeO 37.117%，全部合格；这批不再加渣料。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s7">
+      <span class="time">00:46–00:56</span>
+      <span class="txt"><b>吹氧：氧气 <span class="qty">150 Nm³/min</span>，碳枪 <span class="qty">0 kg/min</span></b>
+        <span class="why">碳枪不要开！这炉 C 超限就是碳枪 40 kg/min 开了 9 分 44 秒、带入约 390 kg C。只有渣子发干、弧光外露时，才开 10–20 kg/min，最多 1–2 分钟。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s8">
+      <span class="time">00:52 / 00:56</span>
+      <span class="txt"><b>两次看成分：目标 C 从 0.58 降到 <span class="qty">0.37–0.38%</span></b>
+        <span class="why">C 到 0.37–0.38 立即停氧；不要吹到 0.30 以下。若 56 min 仍 &gt;0.42，继续吹 1–2 分钟；最晚 60 min 停氧。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s9">
+      <span class="time">00:56–01:00</span>
+      <span class="txt"><b>停氧、取样确认：C 0.37–0.38、P ≤0.02、温度 ≥1630°C</b>
+        <span class="why">P 已低，不需要长时间吹氧去磷；温度不够后面用电极补。若 C &lt;0.35，随合金加 <span class="qty">50 kg 增碳剂</span>。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s10">
+      <span class="time">01:00–01:04</span>
+      <span class="txt"><b>加合金：高碳铬铁 <span class="qty">1.95 t</span> + 低碳锰铁 <span class="qty">0.43 t</span> + 高碳锰铁 <span class="qty">0.17 t</span> + 硅铁 75% 高纯 <span class="qty">0.28 t</span></b>
+        <span class="why">顺序：铬铁 → 低碳锰铁 → 高纯硅铁。不要加铝粒、不要加普通硅铁 75%、不要加高碳锰铁。若熔清 Mn 是 0.30% 用 0.82 t，Mn 0.50% 用 0.58 t。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s11">
+      <span class="time">01:04–01:10</span>
+      <span class="txt"><b>调温：合金前 1650–1675°C，合金后目标 <span class="qty">1630–1660°C</span></b>
+        <span class="why">合金温降约 18°C；温度不够用最大功率补 1–3 分钟，超过 1660 降功率等 1–2 分钟。</span></span>
+    </label>
+    <label class="item"><input type="checkbox" data-k="s12">
+      <span class="time">01:10–01:12</span>
+      <span class="txt"><b>出钢，记录最终成分、温度、重量、渣样</b>
+        <span class="why">最晚 1:20 前出钢；不要为了等成分把时间耗光。</span></span>
+    </label>
+  </div>
+
+  <h2>三、上炉实测与 CO2 差口 <small>#1552807 · 2026-10-26</small></h2>
+  <div class="kpi">
+    <div class="k"><span>出钢量（上炉）</span><b>88 t</b></div>
+    <div class="k"><span>出钢温度（上炉）</span><b>1641°C</b></div>
+    <div class="k"><span>添加剂（上炉）</span><b>$2,192</b></div>
+    <div class="k"><span>总时间（上炉）</span><b>1:16</b></div>
+  </div>
+  <div class="box" style="margin-top:12px">
+    <table>
+      <thead><tr><th>元素</th><th class="num">目标</th><th class="num">上炉实测</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr><td>C</td><td class="num">0.50–0.56</td><td class="num mono">0.52832</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Si</td><td class="num">0.24–0.32</td><td class="num mono">0.30603</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Mn</td><td class="num">0.85–1.20</td><td class="num mono">1.06933</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Cr</td><td class="num">1.50–1.60</td><td class="num mono">1.56817</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>P</td><td class="num">≤0.035</td><td class="num mono">0.00609</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>S</td><td class="num">≤0.035</td><td class="num mono">0.01013</td><td><span class="pill ok">合格</span></td></tr>
+        <tr><td>Al</td><td class="num">≤0.010</td><td class="num mono">0.00650</td><td><span class="pill ok">合格</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note">上炉 13 个元素全部合格；Si 0.306 已接近上限，下一炉高纯硅铁按 <b>0.28 t</b>（Si 回收率按 95% 修正；不要再用 0.32 t）。Cr 1.568 也接近上限，铬碳可按 2.00–2.03 t 微调。</div>
+  </div>
+
+  <div class="warnbox" style="border-color:#f3d18b;background:#fffbeb">
+    <h3 style="color:#92400e">CO2 只差 319 kg：少用电约 640 kWh 就达标</h3>
+    <p style="margin:4px 0 6px">上炉 CO2 17,319.33 kg，目标 ≤17,000；用电 34,549 kWh，折算约 <b>0.501 kg CO2/kWh</b>。只要少用电约 <b>640 kWh</b>：</p>
+    <ul>
+      <li><b>75 MW 保温段缩短 30–60 秒</b>，约省 625–1,250 kWh，CO2 立刻回到 17,000 以下；</li>
+      <li><b>出钢前提前 40–60 秒关功率</b>，不要空转保温；</li>
+      <li><b>氧枪在加合金前 1–2 分钟关掉</b>，不要像上炉那样合金加完 7 秒才关氧；</li>
+      <li>终渣 MgO 8.186 只比下限高 0.19，<b>不要减白云石</b>；碱度 1.698 也够，不要多加石灰。</li>
+    </ul>
+  </div>
+
+  <h2>四、红线与异常处理</h2>
+  <div class="warnbox">
+    <h3>绝对不要做</h3>
+    <ul>
+      <li><b>碳枪不要长期开：</b>这炉 C 1.00% 的首要原因就是碳枪 40 kg/min 开了 9 分 44 秒，带入约 390 kg C。</li>
+      <li><b>铬碳不要超过 2.1 t：</b>模拟器 Cr 回收率约 98%，2.8 t 会到 2.17%；1.95 t 才落在 1.50–1.60。</li>
+      <li><b>不要用普通硅铁 75%：</b>Al 1.23%，0.3 t 就能把 Al 从 0.008 推到 0.0129；只用高纯硅铁（Al 0.024%）。</li>
+      <li><b>合金不要在废钢熔清前加，也不要在氧枪还开着时加：</b>先停氧 1–2 分钟，再依次加铬铁、低碳锰铁、高纯硅铁；否则合金会被氧化，Cr 进渣。</li>
+      <li><b>不要加铝粒：</b>Al 已经接近上限，铝粒只会让它超限。</li>
+    </ul>
+  </div>
+  <div class="okbox">
+    <h3>异常处理</h3>
+    <ul>
+      <li><b>C 停氧时 0.40–0.42：</b>再吹 1–2 分钟；不要直接加合金，否则最终 C 会到 0.56–0.58。</li>
+      <li><b>C 吹到 &lt;0.35：</b>随合金加 50 kg 增碳剂；不要加太多，100 kg 约 +0.10% C。</li>
+      <li><b>温度 &lt;1630：</b>合金加完后用最大功率补 1–3 分钟；不要用氧枪升温。</li>
+      <li><b>温度 &gt;1660：</b>降功率等 1–2 分钟；不要加废钢降温，避免成分和重量失控。</li>
+      <li><b>70 min C 仍 &gt;0.55：</b>立即停氧、直接加合金，优先保 Cr/Si/Mn/温度/重量；没出钢就是 0 分。</li>
+      <li><b>渣：</b>上炉终渣碱度 1.698、MgO 8.186、FeO 37.117，全部合格；MgO 只比下限高 0.19，不要再减白云石，也不要多加石灰。</li>
+    </ul>
+  </div>
+
+  <h2>五、可选：算法优化方案 <small>比验证配方再省约 $474/炉，建议先跑练习炉</small></h2>
+  <div class="okbox">
+    <h3>稳健模式（推荐先验证）</h3>
+    <ul>
+      <li><b>炉料：</b>1 号捆包 67.6 t + DRI 20.9 t + 电炉炉尘 1.3 t + 1 号重废 0.2 t。</li>
+      <li><b>合金：</b>高碳铬铁 1.921 t + 高碳锰铁 217 kg + 低碳锰铁 388 kg + 高纯硅铁 324 kg。</li>
+      <li><b>预期：</b>C 0.536、Si 0.272、Mn 0.990、Cr 1.540、Ni 0.087；scrap+alloy 约 $18,352，比验证配方省约 $474。</li>
+      <li><b>注意：</b>Ni 0.087 距上限 0.10 只有 0.013；若实测 Ni &gt;0.095，炉尘减到 1.2 t、DRI 加到 21.0 t。</li>
+      <li>这条方案是模型算出来的，还没在模拟器实跑；正式比赛建议先用 #1552807 的验证配方，练习炉再试这条。</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>steel-lab · 2026 工程钢 EAF 操作清单 · 按 #1552372 / #1552807 实炉校准</span>
+    <span>打印建议：A4 纵向 · 勾选后可作为赛后复盘记录</span>
+  </footer>
+</div>
+
+<script>
+  const KEY = "steel-lab-checklist-sc21-v1";
+  const boxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  boxes.forEach((b) => {
+    b.checked = !!saved[b.dataset.k];
+    b.closest(".item").classList.toggle("done", b.checked);
+    b.addEventListener("change", () => {
+      saved[b.dataset.k] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(saved));
+      b.closest(".item").classList.toggle("done", b.checked);
+      update();
+    });
+  });
+  function update() {
+    const done = boxes.filter((b) => b.checked).length;
+    const pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+    document.getElementById("progress-text").textContent = done + " / " + boxes.length;
+    document.getElementById("progress-pct").textContent = pct + "%";
+    document.getElementById("progress-bar").style.width = pct + "%";
+  }
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    if (!confirm("确定重置所有勾选？")) return;
+    localStorage.removeItem(KEY);
+    boxes.forEach((b) => { b.checked = false; b.closest(".item").classList.remove("done"); });
+    update();
+  });
+  document.getElementById("btn-print").addEventListener("click", () => window.print());
+  update();
+</script>
+</body>
+</html>

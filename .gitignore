@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.log
+
+# 本地配置：含 LLM API Key 与访问口令
+data/config.json
+
+# 炉次记录：真实使用数据
+data/runs.json
+data/runs.json.tmp
+
+# steeluniversity 官方手册原文与由它构建的知识库（版权材料，不随仓库分发）
+data/manuals/
+data/kb.json
+data/kb.json.tmp
+
+# 个人分享材料（含线上部署链接与访问口令）
+分享给指导教师.md
+朋友圈/
