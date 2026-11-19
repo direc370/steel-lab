@@ -65,12 +65,46 @@ def split_sentences(lines):
     return out
 
 
-def build_doc(doc_key, title, code, rel_path):
+def pack_sentences(sents, size=320, overlap=60):
+    """把句子打包成定长块，相邻块之间保留 overlap 字符的重叠。
+
+    切块是检索的第一道质量关：块太长（整页）会让向量被稀释、BM25 的词频也被
+    平均掉；块之间不留重叠，答案恰好跨在切点两边时两半都召回不到。
+    这里按句子边界切，块内不截断句子，重叠部分回退整句。
+    """
+    chunks = []
+    buf = []
+    length = 0
+    i = 0
+    while i < len(sents):
+        s = sents[i]
+        if length + len(s) <= size or not buf:
+            buf.append(s)
+            length += len(s)
+            i += 1
+            continue
+        text = " ".join(buf).strip()
+        if text:
+            chunks.append(text)
+        tail = []
+        tlen = 0
+        for s2 in reversed(buf):
+            if tlen + len(s2) > overlap:
+                break
+            tail.insert(0, s2)
+            tlen += len(s2)
+        buf, length = tail, tlen
+    if buf:
+        text = " ".join(buf).strip()
+        if text:
+            chunks.append(text)
+    return chunks
+
+
+def build_doc(doc_key, title, code, rel_path, size=320, overlap=60):
     path = os.path.join(ROOT, rel_path)
     raw = open(path, encoding="utf-8").read()
     pages = re.split(r"===== PAGE (\d+) =====", raw)
-    out = []
-    # 重新按页生成，保留页码（上面的循环需要按 chunk 记录页码）
     out = []
     for i in range(1, len(pages), 2):
         page_no = int(pages[i])
@@ -86,17 +120,7 @@ def build_doc(doc_key, title, code, rel_path):
                     sec = f"{m.group(1)} {cand}"
                     break
         sents = split_sentences(lines)
-        buf = ""
-        local = []
-        for s in sents:
-            if len(buf) + len(s) > 520 and buf:
-                local.append(buf.strip())
-                buf = s
-            else:
-                buf = (buf + " " + s).strip() if buf else s
-        if buf.strip():
-            local.append(buf.strip())
-        for text in local:
+        for text in pack_sentences(sents, size=size, overlap=overlap):
             if len(text) < 25:
                 continue
             out.append({

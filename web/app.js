@@ -3233,18 +3233,36 @@ function kv(k, v) { return `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
 
 /* ---------------- knowledge base ---------------- */
 async function viewKB() {
-  const sec = await api("/api/kb/sections").catch(() => ({ sections: [] }));
+  const [sec, st] = await Promise.all([
+    api("/api/kb/sections").catch(() => ({ sections: [] })),
+    api("/api/kb/status").catch(() => null),
+  ]);
   const groups = {};
   (sec.sections || []).forEach((s) => { (groups[s.doc] = groups[s.doc] || []).push(s); });
+  const chunks = (st && st.chunks) || 0;
+  const vecLabel = (st && st.vector) || "none";
+  const pages = new Set();
+  (sec.sections || []).forEach((s) => (s.pages || []).forEach((p) => pages.add(s.doc + p)));
+  const vecShort = vecLabel === "none" ? "向量未启用"
+    : vecLabel.startsWith("fastembed") ? "本地向量模型"
+    : vecLabel.startsWith("api") ? "远程向量接口"
+    : vecLabel === "lsa" ? "LSA 兜底" : vecLabel;
   $("#view").innerHTML = `
-  <div class="page-head"><div><h1>手册知识库</h1><p>两份 steeluniversity 操作手册的全文分块，带页码引用。BM25 检索，中文按字二元组切分。</p></div><div class="spacer"></div>
-    <span class="badge neutral">122 块 · 120 页</span></div>
+  <div class="page-head"><div><h1>手册知识库</h1><p>两份 steeluniversity 操作手册先按句子边界切块，再编码成向量；检索时 BM25 与向量各取一队候选，用 RRF 融合排名。</p></div><div class="spacer"></div>
+    <span class="badge neutral">${chunks} 块 · ${pages.size} 页</span>
+    <span class="badge ${vecLabel === "none" ? "neutral" : "pass"}">${vecShort}</span></div>
   ${renderHeatFlow("kb")}
   <div class="grid" style="grid-template-columns:minmax(0,1fr) 300px">
     <div class="card">
       <div class="card-b">
         <div class="kb-search"><input id="kb-q" type="text" placeholder="例如：铝脱氧  脱硫渣量  料斗体积  液相线温度"><button class="btn primary" id="kb-go">检索</button></div>
-        <div class="tag-line mt8"><span class="badge neutral">EAF 手册</span><span class="badge neutral">SM 手册</span><span class="small muted">支持元素符号与中文互查</span></div>
+        <div class="tag-line mt8" id="kb-mode">
+          <span class="small muted">检索方式</span>
+          <button class="btn sm" data-m="bm25">BM25</button>
+          <button class="btn sm" data-m="vector" ${vecLabel === "none" ? "disabled" : ""}>向量</button>
+          <button class="btn sm primary" data-m="hybrid">混合</button>
+          <span class="small muted">${vecLabel === "none" ? "放好手册后可启用向量检索" : "混合 = 两路召回 + RRF 排名融合"}</span>
+        </div>
       </div>
       <div id="kb-results"><div class="empty">输入关键词检索手册原文。</div></div>
     </div>
@@ -3255,13 +3273,23 @@ async function viewKB() {
       </div>
     </div>
   </div>`;
+  let mode = "hybrid";
+  const syncMode = () => {
+    $$("#kb-mode button").forEach((b) => {
+      b.classList.toggle("primary", b.dataset.m === mode);
+    });
+  };
+  $$("#kb-mode button").forEach((b) => {
+    b.onclick = () => { if (b.disabled) return; mode = b.dataset.m; syncMode(); };
+  });
   const search = async () => {
     const q = $("#kb-q").value.trim();
     if (!q) return;
     $("#kb-results").innerHTML = '<div class="empty">检索中…</div>';
-    const r = await api("/api/kb/search?q=" + encodeURIComponent(q) + "&k=8");
+    const r = await api("/api/kb/search?q=" + encodeURIComponent(q) + "&k=8&mode=" + mode);
+    const tag = { bm25: "BM25", vector: "向量", hybrid: "混合" };
     $("#kb-results").innerHTML = r.results.length ? r.results.map((x) => `<div class="kb-hit">
-      <div class="meta"><span class="badge form">${x.doc === "eaf" ? "EAF" : "SM"}</span><span>${x.doc_title}</span><span>第 ${x.page} 页</span>${x.section ? `<span>${esc(x.section)}</span>` : ""}<span class="mono" style="margin-left:auto">${x.score}</span></div>
+      <div class="meta"><span class="badge form">${x.doc === "eaf" ? "EAF" : "SM"}</span><span>${x.doc_title}</span><span>第 ${x.page} 页</span>${x.section ? `<span>${esc(x.section)}</span>` : ""}<span class="badge neutral">${tag[(x.retriever || "").includes("bm25") ? "bm25" : x.retriever === "vector" ? "vector" : "hybrid"] || "混合"}</span><span class="mono" style="margin-left:auto">${mode === "hybrid" ? "rrf " + Number(x.score).toFixed(3) : x.score}</span></div>
       <div class="text">${highlight(x.text, q)}</div></div>`).join("") : '<div class="empty">没有匹配内容。</div>';
   };
   $("#kb-go").onclick = search;

@@ -1,2 +1,8 @@
-# steel-lab 只用 Python 标准库，没有第三方依赖。
+# steel-lab 的核心功能只用 Python 标准库，没有第三方依赖。
 # Python 3.10+ 即可直接运行：python app.py
+#
+# 可选：向量检索（把手册块编码成稠密向量，BM25 + 向量混合召回）
+#     pip install fastembed
+# 不装也能跑，此时向量一路退化为内置的 LSA 词项空间近似（engine/vec.py）。
+#
+# numpy 若存在会自动用于向量运算加速，缺失时退化为纯 Python 循环。

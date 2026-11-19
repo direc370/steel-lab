@@ -16,6 +16,12 @@ data/manuals/
 data/kb.json
 data/kb.json.tmp
 
+# 向量索引：派生产物，换模型/改切块会自动重建
+data/vectors.json
+data/vectors.json.tmp
+data/vec_index.json
+data/vec_index.json.tmp
+
 # 个人分享材料（含线上部署链接与访问口令）
 分享给指导教师.md
 朋友圈/

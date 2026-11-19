@@ -28,6 +28,7 @@ from engine.dynamics import advise as process_advise
 from engine import refine as R
 from engine.kb import KB
 from engine import agent as A
+from engine import embed as E
 
 WEB = os.path.join(ROOT, "web")
 RUNS = os.path.join(ROOT, "data", "runs.json")
@@ -209,7 +210,18 @@ class Handler(BaseHTTPRequestHandler):
                 q = (qs.get("q") or [""])[0]
                 k = int((qs.get("k") or ["6"])[0])
                 doc = (qs.get("doc") or [None])[0]
-                return self._send(200, {"results": KB.search(q, k=k, doc=doc)})
+                mode = (qs.get("mode") or ["hybrid"])[0]
+                if mode not in ("bm25", "vector", "hybrid"):
+                    mode = "hybrid"
+                KB.vector_index()
+                results = KB.search_hybrid(q, k=k, doc=doc, mode=mode)
+                return self._send(200, {"results": results, "mode": mode,
+                                        "vector": KB.vector_label()})
+            if path == "/api/kb/status":
+                KB.vector_index()
+                return self._send(200, {"chunks": KB.N,
+                                        "vector": KB.vector_label(),
+                                        "embed": E.status()})
             if path == "/api/kb/sections":
                 return self._send(200, {"sections": KB.sections()})
             if path == "/api/runs/export":

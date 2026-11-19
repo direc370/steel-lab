@@ -81,6 +81,67 @@ class KnowledgeBase:
         self.avg = sum(self.len) / max(1, self.N)
         self.idf = {t: math.log(1 + (self.N - n + 0.5) / (n + 0.5)) for t, n in df.items()}
         self.k1, self.b = 1.5, 0.75
+        self._vec = None
+        self._vec_tried = False
+
+    def vector_index(self, dim=64, rebuild=False):
+        """懒加载向量索引。
+
+        优先用 embedding 后端（fastembed 本地模型 / 远程 API）构建的稠密向量；
+        一个都用不了时退到纯标准库的 LSA 索引。都没有知识库就返回 None。
+        """
+        if self._vec_tried and not rebuild:
+            return self._vec
+        self._vec_tried = True
+        if not self.chunks:
+            self._vec = None
+            return None
+
+        try:
+            from .embed import get_backend
+            from .vector_store import VectorStore
+            backend = get_backend()
+            if backend is not None:
+                vs = None if rebuild else VectorStore.load(self.chunks, backend)
+                if vs is None:
+                    vs = VectorStore(self.chunks, backend).build()
+                    try:
+                        vs.save()
+                    except Exception:
+                        pass
+                self._vec = vs
+                return vs
+        except Exception:
+            pass
+
+        try:
+            from .vec import VectorIndex, VEC_PATH
+            vi = None if rebuild else VectorIndex.load(VEC_PATH, self.chunks, dim=dim)
+            if vi is None:
+                vi = VectorIndex(self.chunks, dim=dim)
+                try:
+                    vi.save(VEC_PATH)
+                except Exception:
+                    pass
+            self._vec = vi
+            return vi
+        except Exception:
+            self._vec = None
+            return None
+
+    def vector_label(self):
+        vi = self._vec
+        if vi is None:
+            return "none"
+        meta = getattr(vi, "meta", None)
+        if meta:
+            return f"{meta.get('backend')}:{meta.get('model')}"
+        return getattr(vi, "backend", "unknown")
+
+    def search_hybrid(self, query, k=6, doc=None, mode="hybrid"):
+        """三种模式：bm25（原有）/ vector / hybrid（RRF 融合）。"""
+        from . import hybrid as H
+        return H.search(self, query, k=k, doc=doc, mode=mode)
 
     def search(self, query, k=6, doc=None):
         qt = tokenize(query, drop_stop=True)
